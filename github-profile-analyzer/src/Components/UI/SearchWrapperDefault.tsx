@@ -1,4 +1,4 @@
-import SearchBar from "./SearchBar"
+// import SearchBar from "./SearchBar"
 
 function SearchWrapperDefault() {
     return <>
@@ -7,7 +7,7 @@ function SearchWrapperDefault() {
                 <h1 className="text-(--text) font-['IBM_Plex_Mono'] text-4xl font-bold text-center">
                     <span className="text-(--primary)">Github</span> Profile Analyzer
                 </h1>
-                <SearchBar variant="default" />
+                {/* <SearchBar variant="default" /> */}
             </div>
         </div> 
     </>

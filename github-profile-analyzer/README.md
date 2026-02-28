@@ -71,7 +71,7 @@ export default defineConfig([
   },
 ])
 ```
-
+<!-- Example Architecture -->
 <!-- github-analyzer/
 ├── src/
 │   ├── components/

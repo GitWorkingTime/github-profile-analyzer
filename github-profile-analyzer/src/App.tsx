@@ -1,13 +1,16 @@
+import { GitHubProvider } from "./Context/GitHubProvider"
 import NavBar from "./Components/UI/NavBar"
-import SearchWrapperDefault from "./Components/UI/SearchWrapperDefault"
+import UserPage from "./Components/Profile/UserPage"
 
 function App() {
-  return (
-    <div className="bg-(--bg-color) h-screen">
-      <NavBar />
-      
-    </div>
-  )
+    return (
+        <GitHubProvider>
+            <div className="bg-(--bg-color) h-screen flex flex-col overflow-hidden">
+                <NavBar />
+                <UserPage />
+            </div>
+        </GitHubProvider>
+    )
 }
 
 export default App

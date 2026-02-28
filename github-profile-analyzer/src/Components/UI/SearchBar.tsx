@@ -1,25 +1,21 @@
-import { useEffect, useState } from "react"
-import useGitHubUser from "../../Hooks/useGitHubAPI"
+import { useState } from "react"
+import { useGitHub } from "../../Hooks/useGitHub"
 
 interface SearchBarProps {
     variant: "default" | "navbar"
 }
 
-function SearchBar({variant} : SearchBarProps) {
-    const [username, setUsername] = useState("");
-    const {user, fetchUser} = useGitHubUser()
-
-    useEffect(() => {
-     console.log(user)   
-    }, [user])
+function SearchBar({ variant }: SearchBarProps) {
+    const [username, setUsername] = useState("")
+    const { fetchUser } = useGitHub()
 
     const getUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value)
-    };
+    }
 
     const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if(!username.trim()) return;
+        e.preventDefault()
+        if (!username.trim()) return
         await fetchUser(username)
         setUsername("")
     }
@@ -32,14 +28,15 @@ function SearchBar({variant} : SearchBarProps) {
     ].join(" ")
 
     return <>
-        <form onSubmit={handleSubmit}  className="w-2/3">
-            <input type="text" 
+        <form onSubmit={handleSubmit} className="w-2/3">
+            <input
+                type="text"
                 value={username}
                 onChange={getUsername}
                 className={inputStyling}
                 placeholder="Type in your github username"
             />
-            <button type="submit" className="hidden"/>
+            <button type="submit" className="hidden" />
         </form>
     </>
 }
