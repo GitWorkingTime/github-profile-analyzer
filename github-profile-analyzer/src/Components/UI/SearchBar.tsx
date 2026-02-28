@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react"
 import useGitHubUser from "../../Hooks/useGitHubAPI"
 
-function SearchBar() {
+interface SearchBarProps {
+    variant: "default" | "navbar"
+}
+
+function SearchBar({variant} : SearchBarProps) {
     const [username, setUsername] = useState("");
     const {user, fetchUser} = useGitHubUser()
 
@@ -19,13 +23,20 @@ function SearchBar() {
         await fetchUser(username)
         setUsername("")
     }
-    
+
+    const inputStyling = [
+        "border-2 border-(--text) rounded-3xl text-(--text) italic text-center font-['IBM_Plex_Mono'] outline-none",
+        variant === "default"
+            ? "w-full p-6 text-1xl"
+            : "w-1/4 h-4 text-sm p-4 font-bold"
+    ].join(" ")
+
     return <>
         <form onSubmit={handleSubmit}  className="w-2/3">
             <input type="text" 
                 value={username}
                 onChange={getUsername}
-                className="border-2 border-(--text) w-full rounded-3xl p-6 text-(--text) italic text-center text-1xl font-['IBM_Plex_Mono'] outline-none"
+                className={inputStyling}
                 placeholder="Type in your github username"
             />
             <button type="submit" className="hidden"/>

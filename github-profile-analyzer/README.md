@@ -71,3 +71,35 @@ export default defineConfig([
   },
 ])
 ```
+
+<!-- github-analyzer/
+├── src/
+│   ├── components/
+│   │   ├── ui/              # Reusable UI components (shadcn/ui)
+│   │   ├── charts/          # Visualization components
+│   │   ├── profile/         # Profile-specific components
+│   │   └── comparison/      # Comparison view components
+│   ├── hooks/               # Custom React hooks
+│   │   ├── useGitHubAPI.ts
+│   │   ├── useCache.ts
+│   │   └── useRateLimit.ts
+│   ├── lib/
+│   │   ├── api/             # API clients (Octokit wrapper)
+│   │   ├── cache/           # Caching logic
+│   │   └── utils/           # Helper functions
+│   ├── types/               # TypeScript types
+│   ├── stores/              # State management (Zustand)
+│   ├── pages/               # Route components
+│   └── App.tsx
+├── tests/
+│   ├── unit/
+│   └── e2e/
+├── public/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── package.json
+├── tsconfig.json
+├── tailwind.config.js
+├── vite.config.ts
+└── README.md -->
