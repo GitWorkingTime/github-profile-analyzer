@@ -5,27 +5,28 @@ import { formatField } from "../../Utils/formatField"
 import { formatDomain, formatUrl } from "../../Utils/formatUrl"
 
 function UserCard() {
-    const { user } = useGitHub()
+    const { user, repos } = useGitHub()
 
     useEffect(() => {
-        console.log(user)
-    }, [user])
+        // console.log(user)
+        console.log(repos)
+    }, [user, repos])
 
     return <>
-        <div className="w-1/2 h-full border-2 border-(--text) rounded-4xl p-4">
-            <div id="header" className="flex flex-row w-full gap-4">
-                <div id="pfp">
+        <div className="w-1/2 h-full border-2 border-(--text) rounded-4xl p-4 flex flex-col min-w-140 shrink-0">
+            <div id="header" className="flex flex-row w-full gap-4 items-center">
+                <div id="pfp" className="shrink-0">
                     {user && (
                         <img
                             src={user.avatar_url}
                             alt={`${user.login}'s avatar`}
-                            className="rounded-full w-80 h-80 border-4 border-(--text)"
+                            className="rounded-full w-[clamp(10rem,15vw,20rem)] h-[clamp(10rem,15vw,20rem)] border-4 border-(--text)"
                         />
                     )}
                 </div>
-                <div id="user" className="flex flex-col flex-1 gap-4">
+                <div id="user" className="flex flex-col flex-1 gap-2 min-w-0">
                     <div id="login">
-                        <h1 className="text-5xl font-medium">
+                        <h1 className="text-[clamp(2rem,4vw,3rem)] truncate font-medium">
                             {user && (user.login)}
                         </h1>
                     </div>
@@ -49,7 +50,7 @@ function UserCard() {
                                     target="_blank"
                                     rel="noreferrer"
                                     >
-                                    Blog: <span className="underline" > {formatDomain(user.blog)} </span>
+                                    Website: <span className="underline" > {formatDomain(user.blog)} </span>
                                     </a>
                                 </>
                             )}
@@ -71,7 +72,33 @@ function UserCard() {
                 </div>
 
             </div>
-
+            <div id="repos" className="flex flex-col flex-1 gap-2 min-h-0">
+                <h1 className="py-2 text-5xl font-medium border-b-2 border-(--secondary)">Repositories:</h1>
+                <div 
+                    id="repo-table"
+                    className="flex flex-col flex-1 border-2 border-(--text) rounded-2xl overflow-y-auto pr-1"
+                    style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "var(--secondary) transparent"
+                    }}
+                >
+                        {repos.map(repo => (
+                            <div key={repo.id} className="flex flex-col p-3 pr-2 border-b border-(--text) last:border-0 gap-1 hover:bg-[color-mix(in_srgb,var(--text)_5%,transparent)] transition-colors duration-150">
+                                <div id="repo-header" className="flex flex-row justify-between items-center gap-2">
+                                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="underline font-medium">
+                                        {repo.name}
+                                    </a>
+                                    <span className="text-sm opacity-80">
+                                        {repo.language ?? (repo.size === 0 ? "Empty" : "Unknown")}
+                                    </span>
+                                </div>
+                                <div id="repo-desc">
+                                    <span className="text-sm opacity-50">{repo.description ?? "No Description Provided"}</span>
+                                </div>
+                            </div>
+                        ))}
+                </div>
+            </div>
         </div>
     </>
 }
