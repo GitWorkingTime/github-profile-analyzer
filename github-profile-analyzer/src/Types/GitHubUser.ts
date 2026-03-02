@@ -8,6 +8,7 @@ export interface GitHubUser {
     followers: number
     following: number
     created_at: string
+    updated_at: string
     company: string | null
     location: string | null
     blog: string | null

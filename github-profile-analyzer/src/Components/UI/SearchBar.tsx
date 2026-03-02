@@ -21,7 +21,7 @@ function SearchBar({ variant }: SearchBarProps) {
     }
 
     const inputStyling = [
-        "border-2 border-(--text) rounded-3xl text-(--text) italic text-center font-['IBM_Plex_Mono'] outline-none",
+        "border-2 border-(--text) rounded-3xl italic text-center outline-none",
         variant === "default"
             ? "w-full p-6 text-1xl"
             : "w-1/4 h-4 text-sm p-4 font-bold"
