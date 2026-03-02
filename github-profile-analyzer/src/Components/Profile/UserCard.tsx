@@ -3,6 +3,9 @@ import { useGitHub } from "../../Hooks/useGitHub"
 import { formatDate } from "../../Utils/formatDate"
 import { formatField } from "../../Utils/formatField"
 import { formatDomain, formatUrl } from "../../Utils/formatUrl"
+import Card from "../UI/Card"
+import RepoCard from "../UI/RepoCard"
+
 
 function UserCard() {
     const { user, repos } = useGitHub()
@@ -12,95 +15,81 @@ function UserCard() {
         console.log(repos)
     }, [user, repos])
 
-    return <>
-        <div className="w-1/2 h-full border-2 border-(--text) rounded-4xl p-4 flex flex-col min-w-140 shrink-0">
-            <div id="header" className="flex flex-row w-full gap-4 items-center">
-                <div id="pfp" className="shrink-0">
-                    {user && (
-                        <img
-                            src={user.avatar_url}
-                            alt={`${user.login}'s avatar`}
-                            className="rounded-full w-[clamp(10rem,15vw,20rem)] h-[clamp(10rem,15vw,20rem)] border-4 border-(--text)"
-                        />
-                    )}
-                </div>
-                <div id="user" className="flex flex-col flex-1 gap-2 min-w-0">
-                    <div id="login">
-                        <h1 className="text-[clamp(2rem,4vw,3rem)] truncate font-medium">
-                            {user && (user.login)}
-                        </h1>
-                    </div>
-                    <div id="general-stats" className="w-full border-b-2 border-(--primary) pb-2">
-                        <p>
-
-                            {user && (formatField(`Created: ${formatDate(user.created_at)}`, ``))}
-                            <br></br> 
-                            {user && (formatField(`Updated: ${formatDate(user.updated_at)}`, ``))}
-                            {user && user.location && (
-                                <>
-                                    <br />
-                                    Location: {user.location}
-                                </>
-                            )}
-                            {user && user.blog && (
-                                <>
-                                    <br />
-                                    <a
-                                    href={formatUrl(user.blog)}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    >
-                                    Website: <span className="underline" > {formatDomain(user.blog)} </span>
-                                    </a>
-                                </>
-                            )}
-                        </p>
-                        <div id="follows" className="flex flex-row flex-1 gap-4 justify-between">
-                            <p className="w-1/2">
-                                {user && (formatField(`Followers: ${user.followers}`, ``))}
-                            </p>
-                            <p className="w-1/2">
-                                {user && (formatField(`Following: ${user.following}`, ``))}
-                            </p>
-                        </div>
-                    </div>
-                    <div id="bio">
-                        <p>
-                            {user && (formatField(user.bio, 'Too Cool for a Bio'))}
-                        </p>
-                    </div>
-                </div>
-
+    return <Card>
+        <div id="header" className="flex flex-row w-full gap-4 items-center">
+            <div id="pfp" className="shrink-0">
+                {user && (
+                    <img
+                        src={user.avatar_url}
+                        alt={`${user.login}'s avatar`}
+                        className="rounded-full w-[clamp(10rem,15vw,20rem)] h-[clamp(10rem,15vw,20rem)] border-4 border-(--text)"
+                    />
+                )}
             </div>
-            <div id="repos" className="flex flex-col flex-1 gap-2 min-h-0">
-                <h1 className="py-2 text-5xl font-medium border-b-2 border-(--secondary)">Repositories:</h1>
-                <div 
-                    id="repo-table"
-                    className="flex flex-col flex-1 border-2 border-(--text) rounded-2xl overflow-y-auto pr-1"
-                    style={{
-                        scrollbarWidth: "thin",
-                        scrollbarColor: "var(--secondary) transparent"
-                    }}
-                >
-                        {repos.map(repo => (
-                            <div key={repo.id} className="flex flex-col p-3 pr-2 border-b border-(--text) last:border-0 gap-1 hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)] transition-colors duration-150">
-                                <div id="repo-header" className="flex flex-row justify-between items-center gap-2">
-                                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="underline font-medium">
-                                        {repo.name}
-                                    </a>
-                                    <span className="text-sm opacity-80">
-                                        {repo.language ?? (repo.size === 0 ? "Empty" : "Unknown")}
-                                    </span>
-                                </div>
-                                <div id="repo-desc">
-                                    <span className="text-sm opacity-50">{repo.description ?? "No Description Provided"}</span>
-                                </div>
-                            </div>
-                        ))}
+            <div id="user" className="flex flex-col flex-1 gap-2 min-w-0">
+                <div id="login">
+                    <h1 className="text-[clamp(2rem,4vw,3rem)] truncate font-medium">
+                        {user && (user.login)}
+                    </h1>
                 </div>
+                <div id="general-stats" className="w-full border-b-2 border-(--primary) pb-2">
+                    <p>
+
+                        {user && (formatField(`Created: ${formatDate(user.created_at)}`, ``))}
+                        <br></br> 
+                        {user && (formatField(`Updated: ${formatDate(user.updated_at)}`, ``))}
+                        {user && user.location && (
+                            <>
+                                <br />
+                                Location: {user.location}
+                            </>
+                        )}
+                        {user && user.blog && (
+                            <>
+                                <br />
+                                <a
+                                href={formatUrl(user.blog)}
+                                target="_blank"
+                                rel="noreferrer"
+                                >
+                                Website: <span className="underline" > {formatDomain(user.blog)} </span>
+                                </a>
+                            </>
+                        )}
+                    </p>
+                    <div id="follows" className="flex flex-row flex-1 gap-4 justify-between">
+                        <p className="w-1/2">
+                            {user && (formatField(`Followers: ${user.followers}`, ``))}
+                        </p>
+                        <p className="w-1/2">
+                            {user && (formatField(`Following: ${user.following}`, ``))}
+                        </p>
+                    </div>
+                </div>
+                <div id="bio">
+                    <p>
+                        {user && (formatField(user.bio, 'Too Cool for a Bio'))}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        <div id="repos" className="flex flex-col flex-1 gap-2 min-h-0">
+            <h1 className="py-2 text-5xl font-medium border-b-2 border-(--secondary)">Repositories:</h1>
+            <div 
+                id="repo-table"
+                className="flex flex-col flex-1 border-2 border-(--text) rounded-2xl overflow-y-auto pr-1"
+                style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "var(--secondary) transparent"
+                }}
+            >
+                {repos.map(repo => (
+                    <RepoCard key={repo.id} repo={repo} />
+                ))}
             </div>
         </div>
-    </>
+    </Card>
 }
 
 export default UserCard
