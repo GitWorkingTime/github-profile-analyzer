@@ -1,4 +1,4 @@
-import type { GitHubRepo } from "../../Types/GitHubRepos"
+import type { GitHubRepo } from "../../../Types/GitHubRepos"
 
 function RepoCard({ repo }: { repo: GitHubRepo }) {
     return (

@@ -6,3 +6,11 @@
     --primary: #5FED83;
     --secondary: #BFFFD1;
 }
+
+.heatmap-container text {
+    font-size: 12px !important;
+}
+
+.heatmap-container svg {
+    width: 100% !important
+}

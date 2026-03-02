@@ -4,7 +4,7 @@ import { formatDate } from "../../Utils/formatDate"
 import { formatField } from "../../Utils/formatField"
 import { formatDomain, formatUrl } from "../../Utils/formatUrl"
 import Card from "../UI/Card"
-import RepoCard from "../UI/RepoCard"
+import RepoCard from "../UI/User/RepoCard"
 
 
 function UserCard() {
