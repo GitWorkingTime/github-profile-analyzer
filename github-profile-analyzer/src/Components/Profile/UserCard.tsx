@@ -8,7 +8,7 @@ function UserCard() {
     const { user, repos } = useGitHub()
 
     useEffect(() => {
-        // console.log(user)
+        console.log(user)
         console.log(repos)
     }, [user, repos])
 
