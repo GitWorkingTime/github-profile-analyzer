@@ -21,14 +21,20 @@ function SearchBar({ variant }: SearchBarProps) {
     }
 
     const inputStyling = [
-        "border-2 border-(--text) rounded-3xl italic text-center outline-none",
+        "border-2 border-(--text) rounded-3xl italic text-center outline-none w-full",
         variant === "default"
-            ? "w-full p-6 text-1xl"
-            : "w-1/4 h-4 text-sm p-4 font-bold"
+            ? "p-6 text-1xl"
+            : "h-4 text-sm p-4 font-bold"
+    ].join(" ")
+
+    const formStyling = [
+        variant === "default"
+            ? "w-2/3"
+            : "w-1/4"
     ].join(" ")
 
     return <>
-        <form onSubmit={handleSubmit} className="w-2/3">
+        <form onSubmit={handleSubmit} className={formStyling}>
             <input
                 type="text"
                 value={username}

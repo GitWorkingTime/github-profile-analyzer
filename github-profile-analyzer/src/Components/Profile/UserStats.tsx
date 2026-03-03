@@ -67,6 +67,7 @@ function UserStats() {
         const commitDates = new Set(commits.map(c => c.date))
         const sorted = [...commitDates].sort()
 
+        // Longest streak
         let longest = 0
         let streak = 0
         for (let i = 0; i < sorted.length; i++) {
@@ -81,16 +82,32 @@ function UserStats() {
             longest = Math.max(longest, streak)
         }
 
+        // Current streak
+        // If neither today nor yesterday has commits, streak is 0
+        // If today has no commits but yesterday does, streak is still alive
+        const today = new Date()
+        const todayStr = today.toISOString().split("T")[0].replace(/-/g, "/")
+
+        const yesterday = new Date(today)
+        yesterday.setDate(yesterday.getDate() - 1)
+        const yesterdayStr = yesterday.toISOString().split("T")[0].replace(/-/g, "/")
+
         let current = 0
-        const lastCommitDate = new Date(sorted[sorted.length - 1].replace(/\//g, "-"))
-        for (let i = 0; i < 365; i++) {
-            const date = new Date(lastCommitDate)
-            date.setDate(date.getDate() - i)
-            const dateStr = date.toISOString().split("T")[0].replace(/-/g, "/")
-            if (commitDates.has(dateStr)) {
-                current++
-            } else {
-                break
+
+        if (!commitDates.has(todayStr) && !commitDates.has(yesterdayStr)) {
+            current = 0
+        } else {
+            const startStr = commitDates.has(todayStr) ? todayStr : yesterdayStr
+            const startDate = new Date(startStr.replace(/\//g, "-"))
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(startDate)
+                date.setDate(date.getDate() - i)
+                const dateStr = date.toISOString().split("T")[0].replace(/-/g, "/")
+                if (commitDates.has(dateStr)) {
+                    current++
+                } else {
+                    break
+                }
             }
         }
 

@@ -1,9 +1,16 @@
 import UserCard from "./UserCard"
 import NavBar from "../UI/NavBar"
 import UserStats from "./UserStats"
+// import LoadingBar from "../UI/LoadingBar"
+import SearchWrapperDefault from "../UI/SearchWrapperDefault"
+import { useGitHub } from "../../Hooks/useGitHub"
 
 function UserPage() {
-    return <>
+    const { user } = useGitHub()
+
+    if (!user) return <SearchWrapperDefault />
+
+    return (
         <div className="bg-(--bg-color) h-screen flex flex-col overflow-hidden font-['IBM_Plex_Mono'] text-(--text)">
             <NavBar />
             <div className="flex flex-row flex-1 min-h-0 p-4 gap-4">
@@ -15,7 +22,7 @@ function UserPage() {
                 </div>
             </div>
         </div>
-    </>
+    )
 }
 
 export default UserPage

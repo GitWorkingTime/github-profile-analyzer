@@ -5,8 +5,9 @@ import type { GitHubCommit } from "./GitHubCommit"
 export interface GitHubContextType {
     user: GitHubUser | null
     repos: GitHubRepo[]
+    commits: GitHubCommit[]
     loading: boolean
     error: string | null
-    commits: GitHubCommit[]
     fetchUser: (username: string) => Promise<void>
+    refreshUser: () => Promise<void>
 }

@@ -3,6 +3,7 @@ import { GitHubContext } from "./GitHubContext"
 import type { GitHubUser } from "../Types/GitHubUser"
 import type { GitHubRepo } from "../Types/GitHubRepos"
 import type { GitHubCommit } from "../Types/GitHubCommit"
+import { getCached, setCached, deleteCached } from "../Utils/githubCache"
 
 const GITHUB_HEADERS = {
     Authorization: `Bearer ${import.meta.env.VITE_GITHUB_TOKEN}`
@@ -15,6 +16,7 @@ const fetchAllCommits = async (
 ): Promise<{ commit: { author: { date: string } } }[]> => {
     const allCommits: { commit: { author: { date: string } } }[] = []
     let page = 1
+    const CAP = 50
 
     while (true) {
         const res = await fetch(
@@ -34,7 +36,7 @@ const fetchAllCommits = async (
         if (data.length === 0) break
 
         allCommits.push(...data)
-        if (data.length < 100) break
+        if (allCommits.length >= CAP || data.length < 100) break
 
         page++
     }
@@ -50,9 +52,23 @@ export function GitHubProvider({ children }: { children: React.ReactNode }) {
     const [error, setError] = useState<string | null>(null)
 
     const fetchUser = async (username: string): Promise<void> => {
+        console.log(`fetchUser called for "${username}"`)
+
         setLoading(true)
         setError(null)
         try {
+            // Check cache first
+            const cached = getCached(username)
+            if (cached) {
+                console.log(`Cache hit for "${username}"`)
+                setUser(cached.user)
+                setRepos(cached.repos)
+                setCommits(cached.commits)
+                return
+            }
+
+            console.log(`Cache miss for "${username}", fetching...`)
+
             const [userRes, reposRes] = await Promise.all([
                 fetch(`https://api.github.com/users/${username}`, { headers: GITHUB_HEADERS }),
                 fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: GITHUB_HEADERS })
@@ -109,6 +125,9 @@ export function GitHubProvider({ children }: { children: React.ReactNode }) {
                 count
             }))
 
+            // Store in cache before setting state
+            setCached(username, userData, reposWithLanguages, commitsArray)
+
             setUser(userData)
             setRepos(reposWithLanguages)
             setCommits(commitsArray)
@@ -120,8 +139,15 @@ export function GitHubProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const refreshUser = async (): Promise<void> => {
+        if (!user) return
+        deleteCached(user.login)
+        console.log(`Cache cleared for "${user.login}", refreshing...`)
+        await fetchUser(user.login)
+    }
+
     return (
-        <GitHubContext.Provider value={{ user, repos, commits, loading, error, fetchUser }}>
+        <GitHubContext.Provider value={{ user, repos, commits, loading, error, fetchUser, refreshUser }}>
             {children}
         </GitHubContext.Provider>
     )

@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import { useGitHub } from "../../Hooks/useGitHub"
 import { formatDate } from "../../Utils/formatDate"
 import { formatField } from "../../Utils/formatField"
@@ -9,11 +8,6 @@ import RepoCard from "../UI/User/RepoCard"
 
 function UserCard() {
     const { user, repos } = useGitHub()
-
-    useEffect(() => {
-        console.log(user)
-        console.log(repos)
-    }, [user, repos])
 
     return <CardWrapper>
         <div id="header" className="flex flex-row w-full gap-4 items-center">
