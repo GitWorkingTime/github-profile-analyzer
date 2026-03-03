@@ -3,7 +3,7 @@ import { useGitHub } from "../../Hooks/useGitHub"
 import { formatDate } from "../../Utils/formatDate"
 import { formatField } from "../../Utils/formatField"
 import { formatDomain, formatUrl } from "../../Utils/formatUrl"
-import Card from "../UI/Card"
+import CardWrapper from "../UI/CardWrapper"
 import RepoCard from "../UI/User/RepoCard"
 
 
@@ -15,7 +15,7 @@ function UserCard() {
         console.log(repos)
     }, [user, repos])
 
-    return <Card>
+    return <CardWrapper>
         <div id="header" className="flex flex-row w-full gap-4 items-center">
             <div id="pfp" className="shrink-0">
                 {user && (
@@ -29,10 +29,18 @@ function UserCard() {
             <div id="user" className="flex flex-col flex-1 gap-2 min-w-0">
                 <div id="login">
                     <h1 className="text-[clamp(2rem,4vw,3rem)] truncate font-medium">
-                        {user && (user.login)}
+                        {user && (
+                            <a
+                                href={user.html_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                >
+                                {user.login}
+                            </a>
+                        )}
                     </h1>
                 </div>
-                <div id="general-stats" className="w-full border-b-2 border-(--primary) pb-2">
+                <div id="general-stats" className="w-full border-b-2 border-(--brand-primary) pb-2">
                     <p>
 
                         {user && (formatField(`Created: ${formatDate(user.created_at)}`, ``))}
@@ -75,13 +83,13 @@ function UserCard() {
 
         </div>
         <div id="repos" className="flex flex-col flex-1 gap-2 min-h-0">
-            <h1 className="py-2 text-5xl font-medium border-b-2 border-(--secondary)">Repositories:</h1>
+            <h1 className="py-2 text-5xl font-medium border-b-2 border-(--brand-secondary)">Repositories:</h1>
             <div 
                 id="repo-table"
                 className="flex flex-col flex-1 border-2 border-(--text) rounded-2xl overflow-y-auto pr-1"
                 style={{
                     scrollbarWidth: "thin",
-                    scrollbarColor: "var(--secondary) transparent"
+                    scrollbarColor: "var(--brand-secondary) transparent"
                 }}
             >
                 {repos.map(repo => (
@@ -89,7 +97,7 @@ function UserCard() {
                 ))}
             </div>
         </div>
-    </Card>
+    </CardWrapper>
 }
 
 export default UserCard

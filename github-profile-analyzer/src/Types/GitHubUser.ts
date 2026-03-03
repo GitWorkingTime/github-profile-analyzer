@@ -12,4 +12,5 @@ export interface GitHubUser {
     company: string | null
     location: string | null
     blog: string | null
+    html_url: string
 }

@@ -20,11 +20,11 @@ function CommitHeatMap({ commits, startDate }: CommitHeatMapProps) {
                 endDate={new Date()}
                 weekLabels={['', 'Mon', '', 'Wed', '', 'Fri', '']}
                 panelColors={{
-                    0: 'color-mix(in srgb, var(--secondary) 15%, transparent)',
-                    2: 'color-mix(in srgb, var(--secondary) 35%, transparent)',
-                    5: 'color-mix(in srgb, var(--secondary) 55%, transparent)',
-                    10: 'color-mix(in srgb, var(--secondary) 75%, transparent)',
-                    15: 'var(--secondary)',
+                    0: 'color-mix(in srgb, var(--brand-secondary) 15%, transparent)',
+                    2: 'color-mix(in srgb, var(--brand-secondary) 35%, transparent)',
+                    5: 'color-mix(in srgb, var(--brand-secondary) 55%, transparent)',
+                    10: 'color-mix(in srgb, var(--brand-secondary) 75%, transparent)',
+                    15: 'var(--brand-secondary)',
                 }}
                 style={{ color: 'var(--text)' } as React.CSSProperties}
                 rectProps={{ rx: 2 }}
