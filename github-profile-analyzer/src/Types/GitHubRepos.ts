@@ -8,6 +8,7 @@ export type GitHubRepo = {
     stargazers_count: number
     forks_count: number
     language: string | null
+    created_at: string
     updated_at: string
     visibility: string
 }

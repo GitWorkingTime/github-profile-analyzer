@@ -27,7 +27,7 @@ function LanguagePieChart({ languageCounts }: LanguagePieChartProps) {
     }), {}) satisfies ChartConfig
 
     return (
-        <ChartContainer config={chartConfig} className="h-35 w-35 shrink-0">
+        <ChartContainer config={chartConfig} className="h-38 w-38 shrink-0">
             <PieChart>
                 <Pie
                     data={data}

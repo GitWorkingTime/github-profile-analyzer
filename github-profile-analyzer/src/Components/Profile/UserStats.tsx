@@ -1,9 +1,12 @@
-import { useEffect, useState, useMemo } from "react"
+import { useState, useMemo } from "react"
 import CardWrapper from "../UI/CardWrapper"
 import { useGitHub } from "../../Hooks/useGitHub"
 import CommitHeatMap from "../UI/User/CommitsHeatmap"
 import LanguagePieChart from "../UI/User/LanguagePieChart"
 import { generateColor } from "../../Utils/generateColor"
+import RepoCard from "../UI/User/RepoCard"
+import RepoDetails from "../UI/User/RepoDetails"
+import type { GitHubRepo } from "../../Types/GitHubRepos"
 
 const RANGES = [
     { label: "3 Months", months: 3 },
@@ -14,6 +17,7 @@ const RANGES = [
 function UserStats() {
     const { commits, repos } = useGitHub()
     const [range, setRange] = useState(12)
+    const [selectedRepo, setSelectedRepo] = useState<GitHubRepo | null>(null)
 
     const totalCommits = useMemo(() => {
         return commits.reduce((sum, commit) => sum + commit.count, 0)
@@ -30,14 +34,13 @@ function UserStats() {
     }, [repos])
 
     const languageCounts = useMemo(() => {
-        const languageCounts: Record<string, number> = {}
+        const counts: Record<string, number> = {}
         for (const repo of repos) {
             if (repo.language) {
-                languageCounts[repo.language] = (languageCounts[repo.language] ?? 0) + 1
+                counts[repo.language] = (counts[repo.language] ?? 0) + 1
             }
         }
-
-        return languageCounts
+        return counts
     }, [repos])
 
     const sortedLanguages = useMemo(() => {
@@ -50,10 +53,13 @@ function UserStats() {
     }, [languageCounts])
 
     const columnCount = useMemo(() => {
-        const count = sortedLanguages.length
-        if (count <= 10) return 2
-        return 3
+        return sortedLanguages.length <= 10 ? 2 : 3
     }, [sortedLanguages])
+
+    const legendStyling = [
+        "truncate",
+        columnCount >= 3 ? "text-xs" : "text-sm"
+    ].join(" ")
 
     const { currentStreak, longestStreak } = useMemo(() => {
         if (commits.length === 0) return { currentStreak: 0, longestStreak: 0 }
@@ -61,7 +67,6 @@ function UserStats() {
         const commitDates = new Set(commits.map(c => c.date))
         const sorted = [...commitDates].sort()
 
-        // Longest streak
         let longest = 0
         let streak = 0
         for (let i = 0; i < sorted.length; i++) {
@@ -76,7 +81,6 @@ function UserStats() {
             longest = Math.max(longest, streak)
         }
 
-        // Current streak — start from the last commit day, not today
         let current = 0
         const lastCommitDate = new Date(sorted[sorted.length - 1].replace(/\//g, "-"))
         for (let i = 0; i < 365; i++) {
@@ -93,11 +97,10 @@ function UserStats() {
         return { currentStreak: current, longestStreak: longest }
     }, [commits])
 
-    
-
-    useEffect(() => {
-        console.log(commits)
-    }, [commits])
+    // Derive validated selection — resets automatically when repos changes
+    const validatedSelectedRepo = selectedRepo && repos.some(r => r.id === selectedRepo.id)
+        ? selectedRepo
+        : null
 
     const startDate = new Date()
     startDate.setMonth(startDate.getMonth() - range)
@@ -133,7 +136,7 @@ function UserStats() {
                                                 className="w-2.5 h-2.5 rounded-full shrink-0"
                                                 style={{ backgroundColor: generateColor(index, sortedLanguages.length) }}
                                             />
-                                            <span className="text-sm truncate">{lang} {percentage}%</span>
+                                            <span className={legendStyling}>{lang} {percentage}%</span>
                                         </div>
                                     )
                                 })}
@@ -160,6 +163,33 @@ function UserStats() {
                     </div>
                 </div>
                 <CommitHeatMap commits={commits} startDate={startDate} />
+                <h1 className="text-2xl border-b-2 border-(--brand-primary) pb-1">Repository Activities:</h1>
+                <div id="repo-activities" className="flex flex-row flex-1 min-h-0 gap-2 pt-2">
+                    <div
+                        id="repo-table"
+                        className="w-1/3 flex flex-col border-2 border-(--text) rounded-2xl overflow-y-auto pr-1"
+                        style={{
+                            scrollbarWidth: "thin",
+                            scrollbarColor: "var(--brand-secondary) transparent"
+                        }}
+                    >
+                        {repos.map(repo => (
+                            <div
+                                key={repo.id}
+                                onClick={() => setSelectedRepo(repo)}
+                                className={`cursor-pointer transition-colors duration-150 ${validatedSelectedRepo?.id === repo.id ? "bg-[color-mix(in_srgb,var(--brand-primary)_15%,transparent)]" : ""}`}
+                            >
+                                <RepoCard repo={repo} />
+                            </div>
+                        ))}
+                    </div>
+                    <div id="repo-detailed" className="flex-1 min-h-0">
+                        {validatedSelectedRepo
+                            ? <RepoDetails repo={validatedSelectedRepo} />
+                            : <p className="text-sm opacity-40 text-center mt-4">Choose a repository to view its details</p>
+                        }
+                    </div>
+                </div>
             </div>
         </CardWrapper>
     )
