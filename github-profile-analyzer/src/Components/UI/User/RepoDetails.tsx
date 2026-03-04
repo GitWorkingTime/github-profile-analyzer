@@ -117,7 +117,7 @@ function RepoDetails({ repo }: RepoDetailsProps) {
             {details?.readme && (
                 <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium border-b border-(--brand-primary) pb-1">README:</p>
-                    <pre className="text-xs opacity-70 whitespace-pre-wrap break-words">
+                    <pre className="text-xs opacity-70 whitespace-pre-wrap wrap-break-words">
                         {details.readme.slice(0, 500)}{details.readme.length > 500 ? "..." : ""}
                     </pre>
                 </div>

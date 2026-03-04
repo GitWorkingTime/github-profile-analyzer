@@ -1,12 +1,11 @@
 import UserCard from "./UserCard"
 import NavBar from "../UI/NavBar"
 import UserStats from "./UserStats"
-// import LoadingBar from "../UI/LoadingBar"
 import SearchWrapperDefault from "../UI/SearchWrapperDefault"
 import { useGitHub } from "../../Hooks/useGitHub"
 
 function UserPage() {
-    const { user } = useGitHub()
+    const { user, userB, comparisonMode } = useGitHub()
 
     if (!user) return <SearchWrapperDefault />
 
@@ -17,9 +16,20 @@ function UserPage() {
                 <div className="w-1/2 h-full min-h-0">
                     <UserCard />
                 </div>
-                <div className="w-1/2 h-full min-h-0">
-                    <UserStats />
-                </div>
+                {comparisonMode && userB
+                    ? (
+                        <div
+                            className="w-1/2 h-full min-h-0"
+                            style={{ animation: "fadeIn 0.3s ease-in-out" }}
+                        >
+                            <UserCard isUserB />
+                        </div>
+                    ) : (
+                        <div className="w-1/2 h-full min-h-0">
+                            <UserStats />
+                        </div>
+                    )
+                }
             </div>
         </div>
     )

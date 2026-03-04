@@ -44,99 +44,122 @@ const fetchAllCommits = async (
     return allCommits
 }
 
+const fetchGitHubData = async (username: string) => {
+    const cached = getCached(username)
+    if (cached) {
+        console.log(`Cache hit for "${username}"`)
+        return cached
+    }
+
+    console.log(`Cache miss for "${username}", fetching...`)
+
+    const [userRes, reposRes] = await Promise.all([
+        fetch(`https://api.github.com/users/${username}`, { headers: GITHUB_HEADERS }),
+        fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: GITHUB_HEADERS })
+    ])
+
+    if (userRes.status === 403 || userRes.status === 429) {
+        console.warn("GitHub API rate limit hit.")
+        throw new Error(`HTTP Error: ${userRes.status}`)
+    }
+    if (userRes.status === 404) {
+        console.warn(`User "${username}" not found.`)
+        throw new Error(`HTTP Error: ${userRes.status}`)
+    }
+    if (!userRes.ok) throw new Error(`HTTP Error: ${userRes.status}`)
+    if (!reposRes.ok) throw new Error(`HTTP Error: ${reposRes.status}`)
+
+    const userData: GitHubUser = await userRes.json()
+    const reposData: GitHubRepo[] = await reposRes.json()
+
+    const reposWithLanguages = await Promise.all(
+        reposData.map(async (repo) => {
+            if (repo.language !== null || repo.size === 0) return repo
+            const langRes = await fetch(
+                `https://api.github.com/repos/${repo.full_name}/languages`,
+                { headers: GITHUB_HEADERS }
+            )
+            if (!langRes.ok) return repo
+            const langData: Record<string, number> = await langRes.json()
+            const primaryLanguage = Object.keys(langData)[0] ?? null
+            return { ...repo, language: primaryLanguage }
+        })
+    )
+
+    const since = new Date()
+    since.setFullYear(since.getFullYear() - 1)
+    const sinceISO = since.toISOString()
+    const commitCounts: Record<string, number> = {}
+
+    await Promise.all(
+        reposData.map(async (repo) => {
+            const commitData = await fetchAllCommits(repo.full_name, username, sinceISO)
+            commitData.forEach(({ commit }) => {
+                const date = commit.author.date.split("T")[0].replace(/-/g, "/")
+                commitCounts[date] = (commitCounts[date] ?? 0) + 1
+            })
+        })
+    )
+
+    const commitsArray: GitHubCommit[] = Object.entries(commitCounts).map(([date, count]) => ({
+        date,
+        count
+    }))
+
+    setCached(username, userData, reposWithLanguages, commitsArray)
+
+    return { user: userData, repos: reposWithLanguages, commits: commitsArray }
+}
+
 export function GitHubProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<GitHubUser | null>(null)
     const [repos, setRepos] = useState<GitHubRepo[]>([])
     const [commits, setCommits] = useState<GitHubCommit[]>([])
+    const [userB, setUserB] = useState<GitHubUser | null>(null)
+    const [reposB, setReposB] = useState<GitHubRepo[]>([])
+    const [commitsB, setCommitsB] = useState<GitHubCommit[]>([])
+    const [comparisonMode, setComparisonMode] = useState(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
 
     const fetchUser = async (username: string): Promise<void> => {
-        console.log(`fetchUser called for "${username}"`)
-
         setLoading(true)
         setError(null)
         try {
-            // Check cache first
-            const cached = getCached(username)
-            if (cached) {
-                console.log(`Cache hit for "${username}"`)
-                setUser(cached.user)
-                setRepos(cached.repos)
-                setCommits(cached.commits)
-                return
-            }
-
-            console.log(`Cache miss for "${username}", fetching...`)
-
-            const [userRes, reposRes] = await Promise.all([
-                fetch(`https://api.github.com/users/${username}`, { headers: GITHUB_HEADERS }),
-                fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers: GITHUB_HEADERS })
-            ])
-
-            if (userRes.status === 403 || userRes.status === 429) {
-                console.warn("GitHub API rate limit hit.")
-                throw new Error(`HTTP Error: ${userRes.status}`)
-            }
-            if (userRes.status === 404) {
-                console.warn(`User "${username}" not found.`)
-                throw new Error(`HTTP Error: ${userRes.status}`)
-            }
-            if (!userRes.ok) throw new Error(`HTTP Error: ${userRes.status}`)
-            if (!reposRes.ok) throw new Error(`HTTP Error: ${reposRes.status}`)
-
-            const userData: GitHubUser = await userRes.json()
-            const reposData: GitHubRepo[] = await reposRes.json()
-
-            setRepos([])
-            setCommits([])
-
-            const reposWithLanguages = await Promise.all(
-                reposData.map(async (repo) => {
-                    if (repo.language !== null || repo.size === 0) return repo
-                    const langRes = await fetch(
-                        `https://api.github.com/repos/${repo.full_name}/languages`,
-                        { headers: GITHUB_HEADERS }
-                    )
-                    if (!langRes.ok) return repo
-                    const langData: Record<string, number> = await langRes.json()
-                    const primaryLanguage = Object.keys(langData)[0] ?? null
-                    return { ...repo, language: primaryLanguage }
-                })
-            )
-
-            const since = new Date()
-            since.setFullYear(since.getFullYear() - 1)
-            const sinceISO = since.toISOString()
-            const commitCounts: Record<string, number> = {}
-
-            await Promise.all(
-                reposData.map(async (repo) => {
-                    const commitData = await fetchAllCommits(repo.full_name, username, sinceISO)
-                    commitData.forEach(({ commit }) => {
-                        const date = commit.author.date.split("T")[0].replace(/-/g, "/")
-                        commitCounts[date] = (commitCounts[date] ?? 0) + 1
-                    })
-                })
-            )
-
-            const commitsArray: GitHubCommit[] = Object.entries(commitCounts).map(([date, count]) => ({
-                date,
-                count
-            }))
-
-            // Store in cache before setting state
-            setCached(username, userData, reposWithLanguages, commitsArray)
-
-            setUser(userData)
-            setRepos(reposWithLanguages)
-            setCommits(commitsArray)
+            const data = await fetchGitHubData(username)
+            setUser(data.user)
+            setRepos(data.repos)
+            setCommits(data.commits)
         } catch (err) {
             if (err instanceof Error) setError(err.message)
             throw err
         } finally {
             setLoading(false)
         }
+    }
+
+    const fetchUserB = async (username: string): Promise<void> => {
+        setLoading(true)
+        setError(null)
+        try {
+            const data = await fetchGitHubData(username)
+            setUserB(data.user)
+            setReposB(data.repos)
+            setCommitsB(data.commits)
+            setComparisonMode(true)
+        } catch (err) {
+            if (err instanceof Error) setError(err.message)
+            throw err
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const clearUserB = (): void => {
+        setUserB(null)
+        setReposB([])
+        setCommitsB([])
+        setComparisonMode(false)
     }
 
     const refreshUser = async (): Promise<void> => {
@@ -147,7 +170,13 @@ export function GitHubProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <GitHubContext.Provider value={{ user, repos, commits, loading, error, fetchUser, refreshUser }}>
+        <GitHubContext.Provider value={{
+            user, repos, commits,
+            userB, reposB, commitsB,
+            comparisonMode,
+            loading, error,
+            fetchUser, fetchUserB, clearUserB, refreshUser
+        }}>
             {children}
         </GitHubContext.Provider>
     )
