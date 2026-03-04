@@ -5,9 +5,8 @@ import { formatField } from "../../Utils/formatField"
 import { formatDomain, formatUrl } from "../../Utils/formatUrl"
 import CardWrapper from "../UI/CardWrapper"
 import RepoCard from "../UI/User/RepoCard"
-import LanguagePieChart from "../UI/User/LanguagePieChart"
-import { generateColor } from "@/Utils/generateColor"
 import { compareValues, getCompareStyle } from "../../Utils/compareValues"
+import LanguageDistribution from "../UI/User/LanguageDistribution"
 
 interface UserCardProps {
     isUserB?: boolean
@@ -50,34 +49,6 @@ function UserCard({ isUserB = false}: UserCardProps) {
         { label: "Followers", key: "followers" },
         { label: "Following", key: "following" },
     ]
-
-    const languageCounts = useMemo(() => {
-        const counts: Record<string, number> = {}
-        for (const repo of activeRepos) {
-            if (repo.language) {
-                counts[repo.language] = (counts[repo.language] ?? 0) + 1
-            }
-        }
-        return counts
-    }, [activeRepos])
-
-    const sortedLanguages = useMemo(() => {
-        return Object.entries(languageCounts)
-            .sort(([, a], [, b]) => b - a)
-    }, [languageCounts])
-
-    const columnCount = useMemo(() => {
-        return sortedLanguages.length <= 8 ? 3 : 4
-    }, [sortedLanguages])
-
-    const legendStyling = [
-        "truncate",
-        columnCount >= 4 ? "text-sm" : "text-base"
-    ].join(" ")
-
-    const totalRepoCount = useMemo(() => {
-        return Object.values(languageCounts).reduce((sum, c) => sum + c, 0)
-    }, [languageCounts])
 
     const pfpStyling = [
         comparisonMode === true
@@ -181,26 +152,7 @@ function UserCard({ isUserB = false}: UserCardProps) {
             <>
                 <div className="flex flex-col gap-2 w-full">
                     <h1 className="text-2xl font-medium border-b-2 border-(--brand-secondary) pb-2">Languages:</h1>
-                    <div className="flex flex-row items-center gap-2">
-                        <LanguagePieChart languageCounts={languageCounts} />
-                        <div
-                            className="grid grid-flow-col gap-x-4 gap-y-1"
-                            style={{ gridTemplateRows: `repeat(${Math.ceil(sortedLanguages.length / columnCount)}, minmax(0, 1fr))` }}
-                        >
-                            {sortedLanguages.map(([lang, count], index) => {
-                                const percentage = Math.round((count / totalRepoCount) * 100)
-                                return (
-                                    <div key={lang} className="flex flex-row items-center gap-2">
-                                        <div
-                                            className="w-2.5 h-2.5 rounded-full shrink-0"
-                                            style={{ backgroundColor: generateColor(index, sortedLanguages.length) }}
-                                        />
-                                        <span className={legendStyling}>{lang} {percentage}%</span>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
+                    <LanguageDistribution repos={activeRepos} columnCount={4} />
                 </div>
 
 

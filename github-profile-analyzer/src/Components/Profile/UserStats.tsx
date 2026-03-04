@@ -2,11 +2,10 @@ import { useState, useMemo } from "react"
 import CardWrapper from "../UI/CardWrapper"
 import { useGitHub } from "../../Hooks/useGitHub"
 import CommitHeatMap from "../UI/User/CommitsHeatmap"
-import LanguagePieChart from "../UI/User/LanguagePieChart"
-import { generateColor } from "../../Utils/generateColor"
 import RepoCard from "../UI/User/RepoCard"
 import RepoDetails from "../UI/User/RepoDetails"
 import type { GitHubRepo } from "../../Types/GitHubRepos"
+import LanguageDistribution from "../UI/User/LanguageDistribution"
 
 const RANGES = [
     { label: "3 Months", months: 3 },
@@ -32,34 +31,6 @@ function UserStats() {
     const totalStars = useMemo(() => {
         return repos.reduce((sum, repo) => sum + repo.stargazers_count, 0)
     }, [repos])
-
-    const languageCounts = useMemo(() => {
-        const counts: Record<string, number> = {}
-        for (const repo of repos) {
-            if (repo.language) {
-                counts[repo.language] = (counts[repo.language] ?? 0) + 1
-            }
-        }
-        return counts
-    }, [repos])
-
-    const sortedLanguages = useMemo(() => {
-        return Object.entries(languageCounts)
-            .sort(([, a], [, b]) => b - a)
-    }, [languageCounts])
-
-    const totalRepoCount = useMemo(() => {
-        return Object.values(languageCounts).reduce((sum, c) => sum + c, 0)
-    }, [languageCounts])
-
-    const columnCount = useMemo(() => {
-        return sortedLanguages.length <= 10 ? 2 : 3
-    }, [sortedLanguages])
-
-    const legendStyling = [
-        "truncate",
-        columnCount >= 3 ? "text-xs" : "text-sm"
-    ].join(" ")
 
     const { currentStreak, longestStreak } = useMemo(() => {
         if (commits.length === 0) return { currentStreak: 0, longestStreak: 0 }
@@ -139,26 +110,7 @@ function UserStats() {
                     </div>
                     <div className="flex flex-col gap-2 w-2/3">
                         <h1 className="text-2xl font-medium border-b-2 border-(--brand-secondary) pb-2">Languages:</h1>
-                        <div className="flex flex-row items-center gap-2">
-                            <LanguagePieChart languageCounts={languageCounts} />
-                            <div
-                                className="grid grid-flow-col gap-x-4 gap-y-1"
-                                style={{ gridTemplateRows: `repeat(${Math.ceil(sortedLanguages.length / columnCount)}, minmax(0, 1fr))` }}
-                            >
-                                {sortedLanguages.map(([lang, count], index) => {
-                                    const percentage = Math.round((count / totalRepoCount) * 100)
-                                    return (
-                                        <div key={lang} className="flex flex-row items-center gap-2">
-                                            <div
-                                                className="w-2.5 h-2.5 rounded-full shrink-0"
-                                                style={{ backgroundColor: generateColor(index, sortedLanguages.length) }}
-                                            />
-                                            <span className={legendStyling}>{lang} {percentage}%</span>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
+                        <LanguageDistribution repos={repos} />
                     </div>
                 </div>
                 <div className="flex flex-row justify-between items-center border-b-2 border-(--brand-secondary) pb-2">
