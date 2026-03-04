@@ -22,6 +22,8 @@ A React-based web application that visualizes GitHub user profiles, repository a
 - Recharts
 - @uiw/react-heat-map
 
+Check out the demo [here](https://github-profile-analyzer-ashy.vercel.app/)!
+
 ## Getting Started
 
 ### Prerequisites
@@ -48,94 +50,6 @@ VITE_GITHUB_TOKEN=your_token_here
 ### Running Locally
 ```bash
 npm run dev
-```
-
-## GitHub Pages Deployment
-
-This app uses a GitHub token stored in `.env` which is **never committed**. For deployment, you will need to provide the token via GitHub Actions secrets.
-
-See the [Deployment](#deployment) section below.
-
-## Deployment
-
-### 1. Add your token as a GitHub secret
-
-Go to your repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
-
-- Name: `VITE_GITHUB_TOKEN`
-- Value: your GitHub personal access token
-
-### 2. Install the GitHub Pages plugin for Vite
-```bash
-npm install --save-dev gh-pages
-```
-
-### 3. Update `vite.config.ts`
-
-Add the `base` option so assets resolve correctly on GitHub Pages:
-```ts
-export default defineConfig({
-  base: '/github-profile-analyzer/',
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-})
-```
-
-Replace `github-profile-analyzer` with your actual repository name.
-
-### 4. Add deploy script to `package.json`
-```json
-"scripts": {
-  "deploy": "npm run build && gh-pages -d dist"
-}
-```
-
-### 5. Create `.github/workflows/deploy.yml`
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-        env:
-          VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
-
-### 6. Enable GitHub Pages
-
-Go to your repository → **Settings** → **Pages** → set source to **Deploy from a branch** → select `gh-pages` branch.
-
-Your app will be live at:
-```
-https://your-username.github.io/github-profile-analyzer/
 ```
 
 ## Notes
